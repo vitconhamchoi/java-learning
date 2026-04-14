@@ -1,0 +1,21 @@
+grpc:
+  server:
+    port: 9090
+
+spring:
+  application:
+    name: product-grpc-server
+
+server:
+  port: 8090
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.distributed.grpc: DEBUG
+    net.devh.boot.grpc: INFO

@@ -1,0 +1,41 @@
+server:
+  # Dùng biến môi trường PORT để chạy nhiều instances trên cùng máy
+  # java -jar app.jar --server.port=8082
+  port: ${PORT:8081}
+
+spring:
+  application:
+    name: product-service
+
+eureka:
+  client:
+    service-url:
+      # Eureka server address (dùng hostname trong docker-compose)
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    # Fetch registry mỗi 15s thay vì 30s (nhanh hơn cho demo)
+    registry-fetch-interval-seconds: 15
+  instance:
+    # Đăng ký với IP thay vì hostname (tốt hơn trong container environment)
+    prefer-ip-address: true
+    # Heartbeat interval (mặc định 30s)
+    lease-renewal-interval-in-seconds: 10
+    # Expiration duration (mặc định 90s)
+    lease-expiration-duration-in-seconds: 30
+    # Metadata: thông tin thêm về instance
+    metadata-map:
+      version: "1.0"
+      zone: ${ZONE:us-east}
+      weight: ${WEIGHT:3}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.distributed.product: DEBUG

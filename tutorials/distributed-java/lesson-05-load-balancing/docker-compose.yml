@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  eureka-server:
+    image: springcloud/eureka
+    ports:
+      - "8761:8761"
+    environment:
+      - eureka.client.register-with-eureka=false
+      - eureka.client.fetch-registry=false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  backend-service-1:
+    build: ./backend-service
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+      - WEIGHT=3
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  backend-service-2:
+    build: ./backend-service
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+      - WEIGHT=2
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  backend-service-3:
+    build: ./backend-service
+    ports:
+      - "8083:8083"
+    environment:
+      - PORT=8083
+      - WEIGHT=1
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  load-balancer-demo:
+    build: ./load-balancer-demo
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      backend-service-1:
+        condition: service_started
+      backend-service-2:
+        condition: service_started
+      backend-service-3:
+        condition: service_started
