@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: product-grpc-client
+
+grpc:
+  client:
+    product-service:
+      address: static://localhost:9090
+      negotiation-type: plaintext
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.distributed.grpc: DEBUG
+    net.devh.boot.grpc: INFO

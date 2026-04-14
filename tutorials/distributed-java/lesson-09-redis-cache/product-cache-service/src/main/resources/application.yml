@@ -1,0 +1,19 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: product-cache-service
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cache:
+    type: redis
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+logging:
+  level:
+    com.distributed.cache: DEBUG

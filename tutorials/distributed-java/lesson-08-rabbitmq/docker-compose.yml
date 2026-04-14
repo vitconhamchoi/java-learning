@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks: [rabbitmq-network]
+
+  notification-producer:
+    build: ./notification-producer
+    container_name: notification-producer
+    ports: ["8080:8080"]
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on: [rabbitmq]
+    networks: [rabbitmq-network]
+
+  notification-consumer:
+    build: ./notification-consumer
+    container_name: notification-consumer
+    ports: ["8081:8081"]
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on: [rabbitmq]
+    networks: [rabbitmq-network]
+
+networks:
+  rabbitmq-network:
+    driver: bridge

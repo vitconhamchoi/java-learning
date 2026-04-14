@@ -1,0 +1,29 @@
+server:
+  port: 8761
+
+spring:
+  application:
+    name: eureka-server
+
+eureka:
+  client:
+    # Eureka server không register với chính nó
+    register-with-eureka: false
+    # Không cần fetch registry của chính nó
+    fetch-registry: false
+  server:
+    # Bật self-preservation: không evict instances khi network có vấn đề
+    enable-self-preservation: true
+    # Eviction interval: kiểm tra instances hết hạn mỗi 5 giây
+    eviction-interval-timer-in-ms: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN

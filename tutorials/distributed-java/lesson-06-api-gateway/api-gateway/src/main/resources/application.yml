@@ -1,0 +1,81 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      # Cấu hình routes theo YAML (kết hợp với programmatic routes trong GatewayConfig)
+      routes:
+        # Route đến order-service qua Eureka load balancing
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix=1
+
+        # Route đến product-service
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - StripPrefix=1
+
+      # Cấu hình CORS toàn cục cho tất cả routes
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+      # Cấu hình HTTP client kết nối đến upstream services
+      httpclient:
+        connect-timeout: 2000      # 2 giây timeout kết nối
+        response-timeout: 10s      # 10 giây timeout response
+        pool:
+          max-connections: 500     # Tối đa 500 connections trong pool
+
+      # Bật default filters
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+
+# Eureka client để đăng ký và discover services
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    # Fetch registry mỗi 10 giây để có danh sách services mới nhất
+    registry-fetch-interval-seconds: 10
+  instance:
+    prefer-ip-address: true
+    # Heartbeat mỗi 10 giây
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+# JWT secret key (trong production nên dùng environment variable hoặc vault)
+jwt:
+  secret: mySecretKey12345678901234567890123456789012
+
+# Actuator endpoints để monitoring và management
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  # Expose gateway routes qua actuator
+  # GET /actuator/gateway/routes - xem tất cả routes
+  # POST /actuator/gateway/refresh - refresh routes
+
+# Logging configuration
+logging:
+  level:
+    com.distributed.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+    reactor.netty: INFO

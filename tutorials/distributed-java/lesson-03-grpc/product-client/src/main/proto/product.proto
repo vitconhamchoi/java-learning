@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package com.distributed.grpc;
+
+option java_package = "com.distributed.grpc.proto";
+option java_outer_classname = "ProductProto";
+option java_multiple_files = true;
+
+// ProductService định nghĩa 4 loại gRPC calls:
+// 1. Unary: GetProduct - 1 request, 1 response
+// 2. Server Streaming: ListProducts - 1 request, nhiều responses
+// 3. Client Streaming: CreateProducts - nhiều requests, 1 response
+// 4. Bidirectional Streaming: ChatProducts - nhiều requests VÀ nhiều responses
+service ProductService {
+  // Unary: Lấy thông tin một product theo ID
+  rpc GetProduct (GetProductRequest) returns (ProductResponse);
+
+  // Server Streaming: List products theo category, server gửi từng product một
+  rpc ListProducts (ListProductsRequest) returns (stream ProductResponse);
+
+  // Client Streaming: Client gửi nhiều products, server tạo batch và trả về kết quả
+  rpc CreateProducts (stream CreateProductRequest) returns (BatchCreateResponse);
+
+  // Bidirectional Streaming: Chat-like interaction với products
+  rpc ChatProducts (stream ProductMessage) returns (stream ProductMessage);
+}
+
+// Request để lấy một product
+message GetProductRequest {
+  string id = 1;
+}
+
+// Request để list products với filter
+message ListProductsRequest {
+  string category = 1;
+  int32 page_size = 2;
+}
+
+// Request để tạo một product (dùng trong client streaming)
+message CreateProductRequest {
+  string name = 1;
+  double price = 2;
+  string category = 3;
+}
+
+// Response sau khi batch create
+message BatchCreateResponse {
+  int32 created_count = 1;
+  repeated string ids = 2;
+  string message = 3;
+}
+
+// Product response model
+message ProductResponse {
+  string id = 1;
+  string name = 2;
+  double price = 3;
+  string category = 4;
+  bool in_stock = 5;
+}
+
+// Message cho bidirectional streaming (type + payload pattern)
+message ProductMessage {
+  string type = 1;     // "SEARCH", "FILTER", "RESULT", "ERROR", "DONE"
+  string payload = 2;  // JSON payload tương ứng với type
+}
