@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  command-service:
+    build: ./command-service
+    container_name: command-service
+    ports: ["8080:8080"]
+    networks: [cqrs-network]
+
+  query-service:
+    build: ./query-service
+    container_name: query-service
+    ports: ["8081:8081"]
+    networks: [cqrs-network]
+
+networks:
+  cqrs-network:
+    driver: bridge

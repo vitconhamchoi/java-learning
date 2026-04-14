@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7
+    container_name: redis-locking
+    ports: ["6379:6379"]
+    command: redis-server --appendonly yes
+    networks: [locking-network]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  locking-demo:
+    build: ./locking-demo
+    container_name: locking-demo
+    ports: ["8080:8080"]
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks: [locking-network]
+
+networks:
+  locking-network:
+    driver: bridge

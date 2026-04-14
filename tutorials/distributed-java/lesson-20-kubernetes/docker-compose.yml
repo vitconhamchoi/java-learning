@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  order-service:
+    build: ./order-service
+    container_name: k8s-order-service
+    ports: ["8080:8080"]
+    networks: [k8s-demo-network]
+    environment:
+      - ENVIRONMENT=docker
+      - REPLICA_ID=local-1
+
+networks:
+  k8s-demo-network:
+    driver: bridge

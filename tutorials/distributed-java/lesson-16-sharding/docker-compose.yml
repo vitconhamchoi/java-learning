@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  sharding-demo:
+    build: ./sharding-demo
+    container_name: sharding-demo
+    ports: ["8080:8080"]
+    networks: [sharding-network]
+
+networks:
+  sharding-network:
+    driver: bridge
