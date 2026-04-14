@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    ports: ["6379:6379"]
+    command: redis-server --appendonly yes
+    networks: [cache-network]
+
+  product-cache-service:
+    build: ./product-cache-service
+    container_name: product-cache-service
+    ports: ["8080:8080"]
+    environment:
+      - SPRING_DATA_REDIS_HOST=redis
+    depends_on: [redis]
+    networks: [cache-network]
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    ports: ["8081:8081"]
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on: [redis]
+    networks: [cache-network]
+
+networks:
+  cache-network:
+    driver: bridge
