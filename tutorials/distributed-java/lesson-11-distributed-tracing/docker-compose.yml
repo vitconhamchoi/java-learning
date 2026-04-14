@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports: ["9411:9411"]
+    networks: [tracing-network]
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    ports: ["8081:8081"]
+    environment:
+      - ZIPKIN_BASE_URL=http://zipkin:9411
+    depends_on: [zipkin]
+    networks: [tracing-network]
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    ports: ["8080:8080"]
+    environment:
+      - PAYMENT_SERVICE_URL=http://payment-service:8081
+      - ZIPKIN_BASE_URL=http://zipkin:9411
+    depends_on: [zipkin, payment-service]
+    networks: [tracing-network]
+
+networks:
+  tracing-network:
+    driver: bridge

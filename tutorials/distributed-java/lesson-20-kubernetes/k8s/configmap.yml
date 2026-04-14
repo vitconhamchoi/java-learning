@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-service-config
+  namespace: default
+  labels:
+    app: order-service
+data:
+  ENVIRONMENT: "production"
+  JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC"
+  LOG_LEVEL: "INFO"
+  SERVER_PORT: "8080"

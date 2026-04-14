@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  inventory-participant:
+    build: ./inventory-participant
+    container_name: inventory-participant
+    ports: ["8081:8081"]
+    networks: [tx-network]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  payment-participant:
+    build: ./payment-participant
+    container_name: payment-participant
+    ports: ["8082:8082"]
+    networks: [tx-network]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  transaction-coordinator:
+    build: ./transaction-coordinator
+    container_name: transaction-coordinator
+    ports: ["8080:8080"]
+    environment:
+      - INVENTORY_PARTICIPANT_URL=http://inventory-participant:8081
+      - PAYMENT_PARTICIPANT_URL=http://payment-participant:8082
+    depends_on:
+      inventory-participant:
+        condition: service_healthy
+      payment-participant:
+        condition: service_healthy
+    networks: [tx-network]
+
+networks:
+  tx-network:
+    driver: bridge

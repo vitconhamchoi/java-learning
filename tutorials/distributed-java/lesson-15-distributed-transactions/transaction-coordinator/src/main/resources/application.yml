@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: transaction-coordinator
+
+inventory:
+  participant:
+    url: ${INVENTORY_PARTICIPANT_URL:http://localhost:8081}
+
+payment:
+  participant:
+    url: ${PAYMENT_PARTICIPANT_URL:http://localhost:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
